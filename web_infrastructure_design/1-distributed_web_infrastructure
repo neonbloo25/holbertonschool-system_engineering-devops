@@ -1,0 +1,84 @@
+Distributed Web Infrastructure Design
+-------------------------------------
+
+Diagram (ASCII Representation):
+
+                         +-------------------------+
+                         |     www.foobar.com      |
+                         +-----------+-------------+
+                                     |
+                                     v
+                         +-----------+-------------+
+                         |        Load Balancer     |
+                         |         (HAProxy)        |
+                         +-----------+-------------+
+                                     |
+                    +----------------+----------------+
+                    |                                 |
+                    v                                 v
+         +----------+-----------+         +----------+-----------+
+         |      Server 1         |         |      Server 2         |
+         +----------+-----------+         +----------+-----------+
+                    |                                 |
+        +-----------+-----------+         +-----------+-----------+
+        |     Nginx Web Server   |         |     Nginx Web Server   |
+        +-----------+-----------+         +-----------+-----------+
+                    |                                 |
+        +-----------+-----------+         +-----------+-----------+
+        |     Application Server |         |     Application Server |
+        +-----------+-----------+         +-----------+-----------+
+                    |                                 |
+        +-----------+-----------+         +-----------+-----------+
+        |       App Code Base    |         |       App Code Base    |
+        +-----------+-----------+         +-----------+-----------+
+                    |                                 |
+        +-----------+-----------+         +-----------+-----------+
+        |    MySQL (Replica DB)  |         |   MySQL (Replica DB)   |
+        +------------------------+         +------------------------+
+                    |                                 |
+                    +---------------+-----------------+
+                                    |
+                                    v
+                        +-----------+-----------+
+                        |   Primary MySQL DB    |
+                        +-----------------------+
+
+Components and Roles
+---------------------
+
+1. Load Balancer (HAProxy)
+   - Distributes incoming traffic between Server 1 and Server 2.
+   - Distribution Algorithm: Round Robin (evenly cycles through servers).
+   - Configuration: Active-Active
+     - Active-Active: Both servers handle traffic simultaneously.
+     - Active-Passive: One server handles traffic, another stays idle until failure.
+
+2. Servers (Server 1 and Server 2)
+   - Each contains:
+     - Nginx: Web server that handles static files and proxies to application server.
+     - Application Server: Hosts application logic.
+     - Application Code Base: The website’s source code.
+     - MySQL Replica DB: Read-only database that syncs with the primary DB.
+
+3. MySQL Database Cluster
+   - Primary Node:
+     - Handles all write operations (INSERT, UPDATE).
+   - Replica Nodes:
+     - Handle read operations.
+     - Replicate data asynchronously from the primary node.
+
+Infrastructure Issues
+----------------------
+
+1. Single Points of Failure (SPOFs)
+   - Load Balancer: If it fails, the site becomes unavailable.
+   - Primary Database: If it fails, write operations stop (read-only mode remains).
+
+2. Security Issues
+   - No firewall: All services are publicly accessible.
+   - No HTTPS: Traffic is not encrypted.
+   - No intrusion detection, fail2ban, or Web Application Firewall.
+
+3. Monitoring and Observability
+   - No system monitoring or health checks.
+   - No logging, alerting, or failure notifications.
