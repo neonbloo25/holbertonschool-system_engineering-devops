@@ -1,14 +1,38 @@
 Image link: https://github.com/neonbloo25/holbertonschool-system_engineering-devops/blob/main/web_infrastructure_design/task0.svg
 
+               [ User's Browser ]
+                       │
+                   (Internet)
+                       │
+             ┌───────────────┐
+             │ Load Balancer │   ← Balances traffic across servers
+             └───────────────┘
+              /           \
+      ┌────────────┐   ┌────────────┐
+      │ Web Server1│   │ Web Server2│   ← Apache or Nginx
+      └────────────┘   └────────────┘
+           │                │
+     ┌───────────┐     ┌───────────┐
+     │App Server1│     │App Server2│   ← PHP, Python, etc.
+     └───────────┘     └───────────┘
+           │                │
+     ┌───────────┐     ┌───────────┐
+     │Database 1 │     │ Database 2│   ← MySQL, PostgreSQL, etc.
+     └───────────┘     └───────────┘
+
 Explanation:
-- foobar.com has an A record (or CNAME for www) pointing to 8.8.8.8
-- User’s browser resolves DNS and sends an HTTP request to the server
-- Nginx handles the request and forwards it to the application server
-- The application server executes code, communicates with MySQL, and returns a response
-- Nginx sends back the HTTP response to the user
+    - foobar.com has an A record (or CNAME for www) pointing to 8.8.8.8
+
+    - User’s browser resolves DNS and sends an HTTP request to the server
+
+    - Nginx handles the request and forwards it to the application server
+
+    - The application server executes code, communicates with MySQL, and returns a response
+
+    - Nginx sends back the HTTP response to the user
 
 Issues:
-- Single Point of Failure
-- No load balancing or redundancy
-- Downtime during deployments/restarts
-- Cannot scale beyond the resources of one machine
+    - Single Point of Failure
+    - No load balancing or redundancy
+    - Downtime during deployments/restarts
+    - Cannot scale beyond the resources of one machine

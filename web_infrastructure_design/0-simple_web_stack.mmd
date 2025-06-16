@@ -1,0 +1,16 @@
+graph TD
+    User[User Request - www.foobar.com] --> DNS[DNS Lookup]
+    DNS --> IP[Resolves to 8.8.8.8]
+    IP --> Server[Web Server @ 8.8.8.8]
+
+    Server --> Nginx[Nginx (Web Server)]
+    Nginx --> App[Application Server]
+    App --> Code[Application Files]
+    App --> DB[MySQL Database]
+
+    subgraph Server (8.8.8.8)
+        Nginx
+        App
+        Code
+        DB
+    end
