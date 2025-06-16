@@ -1,0 +1,94 @@
+Secured and Monitored Web Infrastructure Design
+-----------------------------------------------
+
+ASCII Diagram:
+                            +------------------------+
+                            |    www.foobar.com      |
+                            +-----------+------------+
+                                        |
+                                        v
+                            +-----------+------------+
+                            |      Firewall 1        |
+                            +-----------+------------+
+                                        |
+                                        v
+                            +-----------+------------+
+                            |    Load Balancer       |
+                            |       (HAProxy)        |
+                            |   with SSL Termination |
+                            +-----------+------------+
+                                        |
+                  +---------------------+----------------------+
+                  |                                            |
+                  v                                            v
+        +---------+----------+                      +----------+---------+
+        |    Firewall 2      |                      |    Firewall 3      |
+        +---------+----------+                      +----------+---------+
+                  |                                            |
+                  v                                            v
+        +---------+----------+                      +----------+---------+
+        |      Server 1       |                      |      Server 2       |
+        +---------+----------+                      +----------+---------+
+        | Nginx (HTTPS proxy) |                      | Nginx (HTTPS proxy) |
+        | App Server          |                      | App Server          |
+        | MySQL (Replica)     |                      | MySQL (Replica)     |
+        | Monitoring Client   |                      | Monitoring Client   |
+        +---------+----------+                      +----------+---------+
+                  |                                            |
+                  +------------------+-------------------------+
+                                     |
+                                     v
+                          +----------+-----------+
+                          |   Primary MySQL DB   |
+                          |   Monitoring Client  |
+                          +----------------------+
+
+Components and Their Purposes
+-----------------------------
+
+1. Firewalls (Firewall 1, 2, 3)
+   - Restrict unauthorized traffic between the internet, load balancer, and backend servers.
+   - Protect each segment of the network (entry point, and both servers) to isolate and contain potential breaches.
+
+2. SSL Certificate
+   - Installed at the load balancer to enable HTTPS (encrypted traffic).
+   - Protects data in transit from eavesdropping or MITM (Man-in-the-Middle) attacks.
+
+3. Monitoring Clients
+   - Installed on each server to collect metrics/logs.
+   - Data sent to external service (e.g., Sumologic).
+   - Used for real-time visibility and alerting on performance, usage, and errors.
+
+Load Balancer (HAProxy)
+------------------------
+- Distributes incoming traffic evenly (e.g., Round Robin).
+- Terminates SSL to offload encryption overhead from backend servers.
+
+Monitoring and Data Collection
+------------------------------
+- Tools like Sumologic collect:
+  - CPU, memory, disk usage
+  - HTTP logs
+  - Application metrics
+  - MySQL performance (QPS, slow queries)
+- To monitor QPS (queries per second) on a web server:
+  - Enable MySQL slow query logging or use `SHOW GLOBAL STATUS LIKE 'Queries';`
+  - Use monitoring client to scrape and report these metrics over time.
+
+Potential Infrastructure Issues
+-------------------------------
+
+1. SSL Termination at Load Balancer
+   - If SSL ends at the load balancer, traffic to backend servers is in plaintext.
+   - Solution: Use end-to-end encryption (TLS pass-through or re-encryption after load balancer).
+
+2. Single Write-Capable MySQL Server
+   - A single primary DB is a bottleneck and SPOF.
+   - If it fails, no writes can be made.
+   - Solution: Add a secondary primary in failover or use a multi-primary cluster (e.g., Galera Cluster).
+
+3. Homogeneous Server Roles
+   - Each server has web server, app, and DB together.
+   - Limits scalability and maintainability.
+   - Resource-intensive components can interfere with each other.
+   - Solution: Use tiered architecture with dedicated DB, app, and web layers.
