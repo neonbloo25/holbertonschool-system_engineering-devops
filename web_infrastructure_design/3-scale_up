@@ -1,0 +1,79 @@
+Scale Up: Scalable Web Infrastructure Design
+--------------------------------------------
+
+ASCII Diagram:
+                            +-----------------------------+
+                            |        www.foobar.com       |
+                            +--------------+--------------+
+                                           |
+                                           v
+                        +------------------+-------------------+
+                        |     Load Balancer Cluster (HAProxy)   |
+                        |         [Active-Active Setup]         |
+                        +--------+----------------+-------------+
+                                 |                |
+                                 v                v
+                     +-----------+--+         +---+-----------+
+                     |  Web Server 1 |         |  Web Server 2 |
+                     |   (Nginx)     |         |   (Nginx)     |
+                     +-------+------+         +-------+-------+
+                             |                        |
+                             v                        v
+                  +----------+----------+ +-----------+----------+
+                  | Application Server 1| | Application Server 2 |
+                  |  (API / Business    | |  Logic / Frameworks) |
+                  +----------+----------+ +-----------+----------+
+                             |                        |
+                             +-----------+------------+
+                                         |
+                                         v
+                                +--------+--------+
+                                |  Database Server |
+                                |    (MySQL)       |
+                                +------------------+
+
+Infrastructure Components and Purpose
+-------------------------------------
+
+1. Additional Load Balancer
+   - Added to prevent single point of failure at the entry level.
+   - Load balancers are now clustered in **Active-Active** configuration.
+   - Provides redundancy and fault tolerance.
+
+2. Additional Web Server
+   - Helps distribute incoming HTTP traffic.
+   - Improves scalability and handles more concurrent users.
+
+3. Dedicated Application Servers
+   - Application logic separated from web layer.
+   - Improves performance, simplifies scaling.
+
+4. Dedicated Database Server
+   - Centralized database improves data consistency.
+   - Simplifies management and backup.
+
+Web Server vs. Application Server
+---------------------------------
+
+- **Web Server (Nginx)**:
+  - Serves static content (HTML, CSS, JS, images).
+  - Handles HTTP(S) requests.
+  - Acts as a reverse proxy to forward dynamic requests to the app server.
+
+- **Application Server**:
+  - Processes dynamic content and business logic.
+  - Runs backend code (e.g., Python, Node.js, PHP, Java).
+  - Responds to requests forwarded from the web server.
+
+Why Each Component Was Added
+----------------------------
+
+- **New Server**:
+  - To expand infrastructure capacity and improve high availability.
+- **Load Balancer Cluster**:
+  - Prevents outage if one load balancer fails.
+  - Ensures continuous availability of www.foobar.com.
+- **Split Web, App, and DB Servers**:
+  - Promotes separation of concerns.
+  - Each component can scale independently.
+  - Easier to troubleshoot, secure, and optimize.
